@@ -1,6 +1,9 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-
+import asyncio
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.error import TimedOut, NetworkError
 TOKEN = "твой_токен_сюда"  # замени на свой
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
