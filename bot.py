@@ -1,7 +1,15 @@
-from telegram import Update 
-import asyncio
-import os
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+if __name__ == '__main__':
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(main())
+    except KeyboardInterrupt:
+        print("Остановлено вручную.")
+    except Exception as e:
+        print(f"Ошибка: {e}")
+    finally:
+        # Не закрываем loop — библиотека сама справится
+        print("Бот остановлен.")
 
 TOKEN = os.getenv("BOT_TOKEN")
 
@@ -18,11 +26,5 @@ async def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_name))
     await app.run_polling()
 
-if __name__ == '__main__':
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_until_complete(main())
-    finally:
-        loop.run_until_complete(loop.shutdown_asyncgens())
-        loop.close()
+
+    
