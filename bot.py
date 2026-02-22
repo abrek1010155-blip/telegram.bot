@@ -18,6 +18,7 @@ async def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_name))
     await app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+    print("Polling остановлен.")  # Это не выполнится, но важно для Render
 
 if __name__ == '__main__':
     loop = asyncio.new_event_loop()
@@ -28,6 +29,4 @@ if __name__ == '__main__':
         print("Остановлено вручную.")
     except Exception as e:
         print(f"Ошибка: {e}")
-    # Без finally — пусть библиотека сама чистит
-
     
