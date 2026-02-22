@@ -28,7 +28,6 @@ if __name__ == '__main__':
         print("Остановлено вручную.")
     except Exception as e:
         print(f"Ошибка: {e}")
-    finally:
-        print("Бот остановлен.")
+    # Без finally — пусть библиотека сама чистит
 
     
