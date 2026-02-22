@@ -1,3 +1,4 @@
+
 import asyncio
 import os
 import threading
@@ -14,7 +15,7 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
     await update.message.reply_text(f"Круто, {name}! Теперь я тебя знаю. Что дальше?")
 
-# Фейковый сервер, чтобы Render видел порт 8080 и не падал
+# Фейковый HTTP-сервер на порт 8080 для Render
 class DummyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -28,7 +29,7 @@ def run_dummy_server():
 async def main():
     print("Бот запущен. Жду команды /start...")
     
-    # Запускаем фейковый сервер в отдельном потоке
+    # Запускаем фейковый сервер в фоне
     threading.Thread(target=run_dummy_server, daemon=True).start()
     
     app = Application.builder().token(TOKEN).build()
@@ -36,7 +37,6 @@ async def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_name))
     
-    # Самый простой и надёжный запуск в v21 — без лишних await
     print("Polling запущен...")
     app.run_polling(
         drop_pending_updates=True,
@@ -44,4 +44,5 @@ async def main():
     )
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
+
