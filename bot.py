@@ -1,4 +1,3 @@
-
 import asyncio
 import os
 import threading
@@ -15,7 +14,7 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
     await update.message.reply_text(f"Круто, {name}! Теперь я тебя знаю. Что дальше?")
 
-# Фейковый HTTP-сервер на порт 8080 для Render
+# Фейковый сервер, чтобы Render не думал, что процесс мёртв
 class DummyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -23,26 +22,29 @@ class DummyHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"Bot is alive")
 
 def run_dummy_server():
-    server = HTTPServer(("0.0.0.0", 8080), DummyHandler)
+    port = int(os.getenv("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), DummyHandler)
     server.serve_forever()
 
-async def main():
-    print("Бот запущен. Жду команды /start...")
-    
-    # Запускаем фейковый сервер в фоне
+if __name__ == "__main__":
+    # Запускаем фейковый сервер в потоке
     threading.Thread(target=run_dummy_server, daemon=True).start()
-    
+
+    # Создаём приложение
     app = Application.builder().token(TOKEN).build()
-    
+
+    # Хэндлеры
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_name))
-    
-    print("Polling запущен...")
+
+    print("Бот запущен. Polling...")
+
+    # Запускаем polling без asyncio.run() и без shutdown
     app.run_polling(
         drop_pending_updates=True,
-        allowed_updates=Update.ALL_TYPES
+        allowed_updates=Update.ALL_TYPES,
+        # Важно: не трогаем цикл, Render сам им управляет
     )
 
-if __name__ == "__main__":
-    asyncio.run(main())
-
+    # Если дойдёт сюда (не дойдёт), но на всякий
+    print("Polling завершён (но это не должно произойти)")
