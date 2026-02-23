@@ -4,10 +4,10 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message
 
-# Твой токен от BotFather — вставь сюда
-TOKEN = "YOUR_BOT_TOKEN_HERE"
+# Твой токен уже вставлен
+TOKEN = "8356295701:AAFSOGwoY5d01sAcHI0VP-ssK760TubVBBY"
 
-# Настраиваем логи, чтоб не было сюрпризов
+# Логи для отладки
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=TOKEN)
@@ -29,7 +29,7 @@ async def main():
     try:
         await dp.start_polling(bot, skip_updates=True)
     finally:
-        await bot.session.close()  # Чисто закрываем сессию без ошибок
+        await bot.session.close()  # Чистое завершение
 
 if __name__ == "__main__":
     asyncio.run(main())
