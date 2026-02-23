@@ -14,7 +14,7 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
     await update.message.reply_text(f"Круто, {name}! Теперь я тебя знаю. Что дальше?")
 
-# Фейковый сервер, чтобы Render не думал, что процесс мёртв
+# Фейковый сервер для Render (чтобы не думал, что процесс умер)
 class DummyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -27,7 +27,7 @@ def run_dummy_server():
     server.serve_forever()
 
 if __name__ == "__main__":
-    # Запускаем фейковый сервер в потоке
+    # Запускаем фейковый сервер в фоне
     threading.Thread(target=run_dummy_server, daemon=True).start()
 
     # Создаём приложение
@@ -39,12 +39,24 @@ if __name__ == "__main__":
 
     print("Бот запущен. Polling...")
 
-    # Запускаем polling без asyncio.run() и без shutdown
-    app.run_polling(
-        drop_pending_updates=True,
-        allowed_updates=Update.ALL_TYPES,
-        # Важно: не трогаем цикл, Render сам им управляет
-    )
+    # Создаём и запускаем свой цикл событий
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-    # Если дойдёт сюда (не дойдёт), но на всякий
-    print("Polling завершён (но это не должно произойти)")
+    try:
+        loop.run_until_complete(app.initialize())
+        loop.run_until_complete(app.start())
+        loop.run_until_complete(app.updater.start_polling(
+            drop_pending_updates=True,
+            allowed_updates=Update.ALL_TYPES
+        ))
+        # Держим цикл живым
+        loop.run_forever()
+    except KeyboardInterrupt:
+        print("Остановка бота...")
+    finally:
+        # Чистим без ошибок
+        loop.run_until_complete(app.updater.stop())
+        loop.run_until_complete(app.stop())
+        loop.run_until_complete(app.shutdown())
+        loop.close()
